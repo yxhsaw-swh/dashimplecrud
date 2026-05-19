@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Usuários - ADS System</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            background-color: #121212;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: white;
+        }
+
+        .main-content {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .table-responsive {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+            border: 1px solid #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #252525;
+            color: #007bff;
+            padding: 15px;
+            text-align: left;
+            font-size: 13px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #333;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #252525;
+        }
+
+        tbody tr:hover {
+            background-color: #2a2a2a;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .btn-excluir {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="main-content">
+
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div>
+                <h1 style="color: #007bff;">Gestão de Usuários</h1>
+                <p style="color: #bbb;">
+                    Controle as contas administrativas com permissão ao painel.
+                </p>
+            </div>
+
+            <a href="#" class="btn-primary">
+                + Novo Usuário
+            </a>
+        </header>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tabela-usuarios"></tbody>
+            </table>
+        </div>
+
+    </main>
+
+     <script>
+        document.getElementById('ano').textContent = new Date().getFullYear();
+
+        function renderUsuarios() {
+            const lista = JSON.parse(localStorage.getItem('bancoUsuario')) || [];
+            const tbody = document.getElementById('corpo-tabela');
+
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" align="center">Nenhum usuário cadastrado.</td></tr>';
+                document.getElementById('info-registros').textContent = 'Total: 0 registro(s)';
+                return;
+            }
+
+            tbody.innerHTML = lista.map((u, i) => {
+                const nivel = u.nivel == 2 ? 'Administrador' : 'Usuário';
+                return `
+                    <tr>
+                        <td>${String(i + 1).padStart(2, '0')}</td>
+                        <td>${u.nome}</td>
+                        <td>${u.email}</td>
+                        <td>${nivel}</td>
+                        <td><span class="badge ativo">Ativo</span></td>
+                        <td>
+                            <button class="btn-icon" onclick="editar(${i})"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon" onclick="excluir(${i})"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('info-registros').textContent = `Total: ${lista.length} registro(s)`;
+        }
+
+        function editar(index) {
+            const lista = JSON.parse(localStorage.getItem('bancoUsuario')) || [];
+            sessionStorage.setItem('editUsuario', JSON.stringify({ index, dados: lista[index] }));
+            window.location.href = 'cad-usuarios.html';
+        }
+
+        function excluir(index) {
+            if (!confirm('Deseja excluir este usuário?')) return;
+            const lista = JSON.parse(localStorage.getItem('bancoUsuario')) || [];
+            lista.splice(index, 1);
+            localStorage.setItem('bancoUsuario', JSON.stringify(lista));
+            renderUsuarios();
+        }
+
+        renderUsuarios();
+    </script>
+
+</body>
+
+</html>
